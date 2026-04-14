@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl">
+    <h1 class="text-3xl font-semibold text-gray-800 mb-8">Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="card p-6">
+            <p class="text-sm text-gray-500 mb-1">Total Tasks</p>
+            <p class="text-3xl font-medium text-gray-800">{{ tasks_count }}</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-sm text-gray-500 mb-1">Completed</p>
+            <p class="text-3xl font-medium text-gray-800">{{ completed_count }}</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-sm text-gray-500 mb-1">Journal Entries</p>
+            <p class="text-3xl font-medium text-gray-800">{{ journal_count }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="/tasks" class="card p-5 flex items-center gap-4 hover:scale-[1.02] transition-transform cursor-pointer">
+            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-medium text-gray-800">Tasks</p>
+                <p class="text-sm text-gray-500">Manage your tasks</p>
+            </div>
+        </a>
+        <a href="/journal" class="card p-5 flex items-center gap-4 hover:scale-[1.02] transition-transform cursor-pointer">
+            <div class="w-10 h-10 rounded-lg green-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-medium text-gray-800">Journal</p>
+                <p class="text-sm text-gray-500">Write your thoughts</p>
+            </div>
+        </a>
+        <a href="/logs" class="card p-5 flex items-center gap-4 hover:scale-[1.02] transition-transform cursor-pointer">
+            <div class="w-10 h-10 rounded-lg purple-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-medium text-gray-800">Activity</p>
+                <p class="text-sm text-gray-500">View recent activity</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="card p-6 mt-6">
+        <h2 class="text-xl font-medium text-gray-800 mb-4">Recent Activity</h2>
+        <div class="space-y-3">
+            {% for log in recent_logs %}
+            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                <span class="text-gray-700">{{ log.description }}</span>
+                <span class="text-sm text-gray-500">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            {% else %}
+            <p class="text-gray-500">No recent activity</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,278 @@
+import logging
+import hashlib
+from datetime import datetime
+from pathlib import Path
+
+from fastapi import FastAPI, Request, HTTPException, Form
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("stash.log"), logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
+
+DATABASE_URL = "sqlite:///stash.db"
+Base = declarative_base()
+
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    full_name = Column(String)
+    password = Column(String)
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True)
+    content = Column(String)
+    is_done = Column(Boolean, default=False)
+
+
+class Journal(Base):
+    __tablename__ = "journal"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True)
+    content = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class ActivityLog(Base):
+    __tablename__ = "activity_log"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True)
+    description = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables created")
+
+    db = SessionLocal()
+    try:
+        admin = db.query(User).filter(User.email == "fromostrzeszow@gmail.com").first()
+        if not admin:
+            admin = User(
+                email="fromostrzeszow@gmail.com",
+                full_name="Admin",
+                password=hash_password("admin123"),
+            )
+            db.add(admin)
+            db.commit()
+            db.refresh(admin)
+            logger.info("Admin user created: fromostrzeszow@gmail.com")
+            log_activity(admin.id, "Admin user created")
+        else:
+            logger.info("Admin user already exists")
+    finally:
+        db.close()
+
+
+def log_activity(user_id: int, description: str):
+    db = SessionLocal()
+    try:
+        log = ActivityLog(user_id=user_id, description=description)
+        db.add(log)
+        db.commit()
+    finally:
+        db.close()
+
+
+app = FastAPI(title="STASH")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+ADMIN_ID = 1
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    logger.info("Home page accessed")
+    db = SessionLocal()
+    tasks_count = db.query(Task).filter(Task.user_id == ADMIN_ID).count()
+    completed_count = (
+        db.query(Task).filter(Task.user_id == ADMIN_ID, Task.is_done == True).count()
+    )
+    journal_count = db.query(Journal).filter(Journal.user_id == ADMIN_ID).count()
+    recent_logs = (
+        db.query(ActivityLog)
+        .filter(ActivityLog.user_id == ADMIN_ID)
+        .order_by(ActivityLog.created_at.desc())
+        .limit(5)
+        .all()
+    )
+    db.close()
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "tasks_count": tasks_count,
+            "completed_count": completed_count,
+            "journal_count": journal_count,
+            "recent_logs": recent_logs,
+        },
+        status_code=200,
+    )
+
+
+@app.get("/tasks", response_class=HTMLResponse)
+async def tasks_page(request: Request):
+    logger.info("Tasks page accessed")
+    db = SessionLocal()
+    tasks = db.query(Task).filter(Task.user_id == ADMIN_ID).all()
+    db.close()
+    return templates.TemplateResponse(
+        "tasks.html", {"request": request, "tasks": tasks}
+    )
+
+
+def is_htmx(request: Request) -> bool:
+    return request.headers.get("hx-request") == "true"
+
+
+@app.post("/tasks", response_class=HTMLResponse)
+async def add_task(request: Request, content: str = Form(...)):
+    logger.info(f"Task added: {content[:50]}")
+    db = SessionLocal()
+    task = Task(user_id=ADMIN_ID, content=content)
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    log_activity(ADMIN_ID, f"Added task: {content[:30]}")
+    tasks = db.query(Task).filter(Task.user_id == ADMIN_ID).all()
+    db.close()
+    if is_htmx(request):
+        return templates.TemplateResponse(
+            "_tasks_list.html", {"request": request, "tasks": tasks}
+        )
+    return templates.TemplateResponse(
+        "tasks.html", {"request": request, "tasks": tasks}
+    )
+
+
+@app.put("/tasks/{task_id}", response_class=HTMLResponse)
+async def toggle_task(task_id: int, request: Request):
+    logger.info(f"Task toggled: {task_id}")
+    db = SessionLocal()
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if task:
+        task.is_done = not task.is_done
+        db.commit()
+        log_activity(ADMIN_ID, f"Toggled task: {task.content[:30]}")
+    tasks = db.query(Task).filter(Task.user_id == ADMIN_ID).all()
+    db.close()
+    if is_htmx(request):
+        return templates.TemplateResponse(
+            "_tasks_list.html", {"request": request, "tasks": tasks}
+        )
+    return templates.TemplateResponse(
+        "tasks.html", {"request": request, "tasks": tasks}
+    )
+
+
+@app.delete("/tasks/{task_id}", response_class=HTMLResponse)
+async def delete_task(task_id: int, request: Request):
+    logger.info(f"Task deleted: {task_id}")
+    db = SessionLocal()
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if task:
+        content = task.content
+        db.delete(task)
+        db.commit()
+        log_activity(ADMIN_ID, f"Deleted task: {content[:30]}")
+    tasks = db.query(Task).filter(Task.user_id == ADMIN_ID).all()
+    db.close()
+    if is_htmx(request):
+        return templates.TemplateResponse(
+            "_tasks_list.html", {"request": request, "tasks": tasks}
+        )
+    return templates.TemplateResponse(
+        "tasks.html", {"request": request, "tasks": tasks}
+    )
+
+
+@app.get("/journal", response_class=HTMLResponse)
+async def journal_page(request: Request):
+    logger.info("Journal page accessed")
+    db = SessionLocal()
+    entries = (
+        db.query(Journal)
+        .filter(Journal.user_id == ADMIN_ID)
+        .order_by(Journal.created_at.desc())
+        .all()
+    )
+    db.close()
+    return templates.TemplateResponse(
+        "journal.html", {"request": request, "entries": entries}
+    )
+
+
+@app.post("/journal", response_class=HTMLResponse)
+async def add_journal(request: Request, content: str = Form(...)):
+    logger.info(f"Journal entry added")
+    db = SessionLocal()
+    entry = Journal(user_id=ADMIN_ID, content=content)
+    db.add(entry)
+    db.commit()
+    log_activity(ADMIN_ID, "Added journal entry")
+    entries = (
+        db.query(Journal)
+        .filter(Journal.user_id == ADMIN_ID)
+        .order_by(Journal.created_at.desc())
+        .all()
+    )
+    db.close()
+    if is_htmx(request):
+        return templates.TemplateResponse(
+            "_journal_list.html", {"request": request, "entries": entries}
+        )
+    return templates.TemplateResponse(
+        "journal.html", {"request": request, "entries": entries}
+    )
+
+
+@app.get("/logs", response_class=HTMLResponse)
+async def logs_page(request: Request):
+    logger.info("Logs page accessed")
+    db = SessionLocal()
+    logs = (
+        db.query(ActivityLog)
+        .filter(ActivityLog.user_id == ADMIN_ID)
+        .order_by(ActivityLog.created_at.desc())
+        .all()
+    )
+    db.close()
+    return templates.TemplateResponse("logs.html", {"request": request, "logs": logs})
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    init_db()
+    logger.info("Starting STASH application")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
