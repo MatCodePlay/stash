@@ -7,11 +7,23 @@
     </div>
 
     <div class="card p-6 mb-6">
-        <form hx-post="/tasks" hx-target="#tasks-list" hx-swap="innerHTML" class="flex gap-3">
-            <input type="text" name="content" placeholder="Add a new task..." 
-                class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500">
-            <button type="submit" class="btn-primary px-6 py-2 text-sm">Add</button>
+        <form hx-post="/tasks" hx-target="#tasks-list" hx-swap="innerHTML" class="flex gap-3" id="task-form">
+            <input type="text" name="content" placeholder="Add a new task..." required
+                class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500" id="task-input">
+            <button type="submit" class="btn-primary px-6 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed" id="add-btn" disabled>Add</button>
         </form>
+        <script>
+            const taskInput = document.getElementById('task-input');
+            const addBtn = document.getElementById('add-btn');
+            const taskForm = document.getElementById('task-form');
+            taskInput.addEventListener('input', function() {
+                addBtn.disabled = !this.value.trim();
+            });
+            taskForm.addEventListener('htmx:afterRequest', function() {
+                taskInput.value = '';
+                addBtn.disabled = true;
+            });
+        </script>
     </div>
 
     <div id="tasks-list" class="space-y-3">

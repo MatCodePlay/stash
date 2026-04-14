@@ -346,26 +346,46 @@ async def journal_page(request: Request, page: int = Query(1, ge=1)):
 
 
 @app.post("/journal", response_class=HTMLResponse)
-async def add_journal(request: Request, content: str = Form(...)):
+async def add_journal(
+    request: Request, content: str = Form(...), page: int = Query(1, ge=1)
+):
     logger.info(f"Journal entry added")
     db = SessionLocal()
     entry = Journal(user_id=ADMIN_ID, content=content)
     db.add(entry)
     db.commit()
     log_activity(ADMIN_ID, "Added journal entry")
+    per_page = 10
+    offset = (page - 1) * per_page
+    total = db.query(Journal).filter(Journal.user_id == ADMIN_ID).count()
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
     entries = (
         db.query(Journal)
         .filter(Journal.user_id == ADMIN_ID)
         .order_by(Journal.created_at.desc())
+        .limit(per_page)
+        .offset(offset)
         .all()
     )
     db.close()
     if is_htmx(request):
         return templates.TemplateResponse(
-            "_journal_list.html", {"request": request, "entries": entries}
+            "_journal_list.html",
+            {
+                "request": request,
+                "entries": entries,
+                "page": page,
+                "total_pages": total_pages,
+            },
         )
     return templates.TemplateResponse(
-        "journal.html", {"request": request, "entries": entries}
+        "journal.html",
+        {
+            "request": request,
+            "entries": entries,
+            "page": page,
+            "total_pages": total_pages,
+        },
     )
 
 

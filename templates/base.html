@@ -32,11 +32,17 @@
                 <span class="text-lg font-medium text-gray-800">STASH</span>
             </div>
             <nav class="space-y-1 flex-1">
-                <a href="/" class="nav-item block text-sm text-gray-700">Dashboard</a>
-                <a href="/tasks" class="nav-item block text-sm text-gray-700">Tasks</a>
-                <a href="/journal" class="nav-item block text-sm text-gray-700">Journal</a>
-                <a href="/logs" class="nav-item block text-sm text-gray-700">Activity</a>
+                <a href="/" class="nav-item block text-sm text-gray-700" id="nav-dashboard">Dashboard</a>
+                <a href="/tasks" class="nav-item block text-sm text-gray-700" id="nav-tasks">Tasks</a>
+                <a href="/journal" class="nav-item block text-sm text-gray-700" id="nav-journal">Journal</a>
+                <a href="/logs" class="nav-item block text-sm text-gray-700" id="nav-logs">Activity</a>
             </nav>
+            <script>
+                const path = window.location.pathname;
+                const map = {'/': 'nav-dashboard', '/tasks': 'nav-tasks', '/journal': 'nav-journal', '/logs': 'nav-logs'};
+                const activeId = map[path] || 'nav-dashboard';
+                document.getElementById(activeId)?.classList.add('active');
+            </script>
             <div class="mt-auto pt-4 border-t border-gray-200">
                 <p class="text-xs text-gray-500">Admin</p>
             </div>
