@@ -3,7 +3,7 @@ import hashlib
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import FastAPI, Request, HTTPException, Form
+from fastapi import FastAPI, Request, HTTPException, Form, Query
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -39,6 +39,8 @@ class Task(Base):
     user_id = Column(Integer, index=True)
     content = Column(String)
     is_done = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
 
 
 class Journal(Base):
@@ -141,13 +143,37 @@ async def index(request: Request):
 
 
 @app.get("/tasks", response_class=HTMLResponse)
-async def tasks_page(request: Request):
+async def tasks_page(request: Request, page: int = Query(1, ge=1)):
     logger.info("Tasks page accessed")
     db = SessionLocal()
-    tasks = db.query(Task).filter(Task.user_id == ADMIN_ID).all()
+    per_page = 8
+    offset = (page - 1) * per_page
+    total = db.query(Task).filter(Task.user_id == ADMIN_ID).count()
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
+    active = (
+        db.query(Task)
+        .filter(Task.user_id == ADMIN_ID, Task.is_done == False)
+        .order_by(Task.created_at.desc())
+        .all()
+    )
+    completed = (
+        db.query(Task)
+        .filter(Task.user_id == ADMIN_ID, Task.is_done == True)
+        .order_by(Task.completed_at.desc())
+        .all()
+    )
+    all_tasks = active + completed
+    tasks = all_tasks[offset : offset + per_page]
     db.close()
     return templates.TemplateResponse(
-        "tasks.html", {"request": request, "tasks": tasks}
+        "tasks.html",
+        {
+            "request": request,
+            "tasks": tasks,
+            "page": page,
+            "total_pages": total_pages,
+            "per_page": per_page,
+        },
     )
 
 
@@ -156,7 +182,9 @@ def is_htmx(request: Request) -> bool:
 
 
 @app.post("/tasks", response_class=HTMLResponse)
-async def add_task(request: Request, content: str = Form(...)):
+async def add_task(
+    request: Request, content: str = Form(...), page: int = Query(1, ge=1)
+):
     logger.info(f"Task added: {content[:50]}")
     db = SessionLocal()
     task = Task(user_id=ADMIN_ID, content=content)
@@ -164,39 +192,88 @@ async def add_task(request: Request, content: str = Form(...)):
     db.commit()
     db.refresh(task)
     log_activity(ADMIN_ID, f"Added task: {content[:30]}")
-    tasks = db.query(Task).filter(Task.user_id == ADMIN_ID).all()
+    per_page = 8
+    offset = (page - 1) * per_page
+    total = db.query(Task).filter(Task.user_id == ADMIN_ID).count()
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
+    active = (
+        db.query(Task)
+        .filter(Task.user_id == ADMIN_ID, Task.is_done == False)
+        .order_by(Task.created_at.desc())
+        .all()
+    )
+    completed = (
+        db.query(Task)
+        .filter(Task.user_id == ADMIN_ID, Task.is_done == True)
+        .order_by(Task.completed_at.desc())
+        .all()
+    )
+    all_tasks = active + completed
+    tasks = all_tasks[offset : offset + per_page]
     db.close()
     if is_htmx(request):
         return templates.TemplateResponse(
-            "_tasks_list.html", {"request": request, "tasks": tasks}
+            "_tasks_list.html",
+            {
+                "request": request,
+                "tasks": tasks,
+                "page": page,
+                "total_pages": total_pages,
+            },
         )
     return templates.TemplateResponse(
-        "tasks.html", {"request": request, "tasks": tasks}
+        "tasks.html",
+        {"request": request, "tasks": tasks, "page": page, "total_pages": total_pages},
     )
 
 
 @app.put("/tasks/{task_id}", response_class=HTMLResponse)
-async def toggle_task(task_id: int, request: Request):
+async def toggle_task(task_id: int, request: Request, page: int = Query(1, ge=1)):
     logger.info(f"Task toggled: {task_id}")
     db = SessionLocal()
     task = db.query(Task).filter(Task.id == task_id).first()
     if task:
         task.is_done = not task.is_done
+        task.completed_at = datetime.utcnow() if task.is_done else None
         db.commit()
         log_activity(ADMIN_ID, f"Toggled task: {task.content[:30]}")
-    tasks = db.query(Task).filter(Task.user_id == ADMIN_ID).all()
+    per_page = 8
+    offset = (page - 1) * per_page
+    total = db.query(Task).filter(Task.user_id == ADMIN_ID).count()
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
+    active = (
+        db.query(Task)
+        .filter(Task.user_id == ADMIN_ID, Task.is_done == False)
+        .order_by(Task.created_at.desc())
+        .all()
+    )
+    completed = (
+        db.query(Task)
+        .filter(Task.user_id == ADMIN_ID, Task.is_done == True)
+        .order_by(Task.completed_at.desc())
+        .all()
+    )
+    all_tasks = active + completed
+    tasks = all_tasks[offset : offset + per_page]
     db.close()
     if is_htmx(request):
         return templates.TemplateResponse(
-            "_tasks_list.html", {"request": request, "tasks": tasks}
+            "_tasks_list.html",
+            {
+                "request": request,
+                "tasks": tasks,
+                "page": page,
+                "total_pages": total_pages,
+            },
         )
     return templates.TemplateResponse(
-        "tasks.html", {"request": request, "tasks": tasks}
+        "tasks.html",
+        {"request": request, "tasks": tasks, "page": page, "total_pages": total_pages},
     )
 
 
 @app.delete("/tasks/{task_id}", response_class=HTMLResponse)
-async def delete_task(task_id: int, request: Request):
+async def delete_task(task_id: int, request: Request, page: int = Query(1, ge=1)):
     logger.info(f"Task deleted: {task_id}")
     db = SessionLocal()
     task = db.query(Task).filter(Task.id == task_id).first()
@@ -205,30 +282,66 @@ async def delete_task(task_id: int, request: Request):
         db.delete(task)
         db.commit()
         log_activity(ADMIN_ID, f"Deleted task: {content[:30]}")
-    tasks = db.query(Task).filter(Task.user_id == ADMIN_ID).all()
+    per_page = 8
+    offset = (page - 1) * per_page
+    total = db.query(Task).filter(Task.user_id == ADMIN_ID).count()
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
+    active = (
+        db.query(Task)
+        .filter(Task.user_id == ADMIN_ID, Task.is_done == False)
+        .order_by(Task.created_at.desc())
+        .all()
+    )
+    completed = (
+        db.query(Task)
+        .filter(Task.user_id == ADMIN_ID, Task.is_done == True)
+        .order_by(Task.completed_at.desc())
+        .all()
+    )
+    all_tasks = active + completed
+    tasks = all_tasks[offset : offset + per_page]
     db.close()
     if is_htmx(request):
         return templates.TemplateResponse(
-            "_tasks_list.html", {"request": request, "tasks": tasks}
+            "_tasks_list.html",
+            {
+                "request": request,
+                "tasks": tasks,
+                "page": page,
+                "total_pages": total_pages,
+            },
         )
     return templates.TemplateResponse(
-        "tasks.html", {"request": request, "tasks": tasks}
+        "tasks.html",
+        {"request": request, "tasks": tasks, "page": page, "total_pages": total_pages},
     )
 
 
 @app.get("/journal", response_class=HTMLResponse)
-async def journal_page(request: Request):
+async def journal_page(request: Request, page: int = Query(1, ge=1)):
     logger.info("Journal page accessed")
     db = SessionLocal()
+    per_page = 10
+    offset = (page - 1) * per_page
+    total = db.query(Journal).filter(Journal.user_id == ADMIN_ID).count()
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
     entries = (
         db.query(Journal)
         .filter(Journal.user_id == ADMIN_ID)
         .order_by(Journal.created_at.desc())
+        .limit(per_page)
+        .offset(offset)
         .all()
     )
     db.close()
     return templates.TemplateResponse(
-        "journal.html", {"request": request, "entries": entries}
+        "journal.html",
+        {
+            "request": request,
+            "entries": entries,
+            "page": page,
+            "total_pages": total_pages,
+        },
     )
 
 
@@ -257,17 +370,26 @@ async def add_journal(request: Request, content: str = Form(...)):
 
 
 @app.get("/logs", response_class=HTMLResponse)
-async def logs_page(request: Request):
+async def logs_page(request: Request, page: int = Query(1, ge=1)):
     logger.info("Logs page accessed")
     db = SessionLocal()
+    per_page = 10
+    offset = (page - 1) * per_page
+    total = db.query(ActivityLog).filter(ActivityLog.user_id == ADMIN_ID).count()
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 1
     logs = (
         db.query(ActivityLog)
         .filter(ActivityLog.user_id == ADMIN_ID)
         .order_by(ActivityLog.created_at.desc())
+        .limit(per_page)
+        .offset(offset)
         .all()
     )
     db.close()
-    return templates.TemplateResponse("logs.html", {"request": request, "logs": logs})
+    return templates.TemplateResponse(
+        "logs.html",
+        {"request": request, "logs": logs, "page": page, "total_pages": total_pages},
+    )
 
 
 if __name__ == "__main__":

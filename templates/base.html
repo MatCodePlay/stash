@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STASH</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -18,30 +19,29 @@
         .nav-item.active { background: rgba(0,113,227,0.1); color: #0071e3; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="flex min-h-screen">
-        <aside class="sidebar w-64 flex-shrink-0 p-6 flex flex-col">
-            <div class="flex items-center gap-3 mb-10">
-                <svg class="w-8 h-8" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<body class="bg-gray-50 min-h-screen flex justify-center">
+    <div class="flex w-[800px]">
+        <aside class="sidebar w-52 flex-shrink-0 py-6 px-4 flex flex-col rounded-r-xl">
+            <div class="flex items-center gap-2 mb-8">
+                <svg class="w-6 h-6" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="16" cy="16" r="14" stroke="#0071e3" stroke-width="2"/>
                     <path d="M16 8C16 8 12 12 12 16C12 20 16 24 16 24" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/>
                     <path d="M16 8C16 8 20 12 20 16C20 20 16 24 16 24" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/>
                     <circle cx="16" cy="16" r="3" fill="#0071e3"/>
                 </svg>
-                <span class="text-xl font-medium text-gray-800">STASH</span>
+                <span class="text-lg font-medium text-gray-800">STASH</span>
             </div>
             <nav class="space-y-1 flex-1">
-                <a href="/" class="nav-item block text-gray-700 {% if request.url.path == '/' %}active{% endif %}">Dashboard</a>
-                <a href="/tasks" class="nav-item block text-gray-700 {% if request.url.path == '/tasks' %}active{% endif %}">Tasks</a>
-                <a href="/journal" class="nav-item block text-gray-700 {% if request.url.path == '/journal' %}active{% endif %}">Journal</a>
-                <a href="/logs" class="nav-item block text-gray-700 {% if request.url.path == '/logs' %}active{% endif %}">Activity</a>
+                <a href="/" class="nav-item block text-sm text-gray-700">Dashboard</a>
+                <a href="/tasks" class="nav-item block text-sm text-gray-700">Tasks</a>
+                <a href="/journal" class="nav-item block text-sm text-gray-700">Journal</a>
+                <a href="/logs" class="nav-item block text-sm text-gray-700">Activity</a>
             </nav>
-            <div class="mt-auto pt-6 border-t border-gray-200">
-                <p class="text-xs text-gray-500">Admin User</p>
-                <p class="text-sm text-gray-700">fromostrzeszow@gmail.com</p>
+            <div class="mt-auto pt-4 border-t border-gray-200">
+                <p class="text-xs text-gray-500">Admin</p>
             </div>
         </aside>
-        <main class="flex-1 p-8 overflow-auto">
+        <main class="flex-1 p-6 overflow-hidden w-[500px]">
             {% block content %}{% endblock %}
         </main>
     </div>

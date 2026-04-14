@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-4xl">
+<div class="w-full">
     <h1 class="text-3xl font-semibold text-gray-800 mb-6">Activity Log</h1>
 
     <div class="card overflow-hidden">
@@ -26,5 +26,17 @@
             </tbody>
         </table>
     </div>
+
+    {% if total_pages is defined and total_pages > 1 %}
+    <div class="flex justify-center items-center gap-4 mt-6">
+        {% if page > 1 %}
+        <a href="/logs?page={{ page - 1 }}" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Previous</a>
+        {% endif %}
+        <span class="text-sm text-gray-500">Page {{ page }} / {{ total_pages }}</span>
+        {% if page < total_pages %}
+        <a href="/logs?page={{ page + 1 }}" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
