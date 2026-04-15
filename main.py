@@ -1,12 +1,14 @@
 import logging
 import hashlib
+import secrets
 from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request, HTTPException, Form, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
@@ -100,6 +102,7 @@ def log_activity(user_id: int, description: str):
 app = FastAPI(title="STASH")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+app.add_middleware(SessionMiddleware, secret_key=secrets.token_hex(32))
 
 ADMIN_ID = 1
 
@@ -112,8 +115,62 @@ def get_db():
         db.close()
 
 
+def get_current_user(request: Request) -> int | None:
+    user_id = request.session.get("user_id")
+    return user_id
+
+
+def login_required(request: Request):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+    return user_id
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request, error: str | None = None):
+    logger.info("Login page accessed")
+    return templates.TemplateResponse(
+        "login.html", {"request": request, "error": error}
+    )
+
+
+@app.post("/login", response_class=HTMLResponse)
+async def login(request: Request, email: str = Form(...), password: str = Form(...)):
+    logger.info(f"Login attempt: {email}")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == email).first()
+    db.close()
+
+    if user is not None and user.password == hash_password(password):
+        request.session["user_id"] = user.id
+        request.session["email"] = user.email
+        logger.info(f"Login successful: {email}")
+        return RedirectResponse(url="/", status_code=302)
+
+    return templates.TemplateResponse(
+        "login.html", {"request": request, "error": "Invalid email or password"}
+    )
+
+
+@app.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request):
+    request.session.clear()
+    logger.info("User logged out")
+    return RedirectResponse(url="/login", status_code=302)
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
     logger.info("Home page accessed")
     db = SessionLocal()
     tasks_count = db.query(Task).filter(Task.user_id == ADMIN_ID).count()
@@ -144,6 +201,10 @@ async def index(request: Request):
 
 @app.get("/tasks", response_class=HTMLResponse)
 async def tasks_page(request: Request, page: int = Query(1, ge=1)):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
     logger.info("Tasks page accessed")
     db = SessionLocal()
     per_page = 8
@@ -319,6 +380,10 @@ async def delete_task(task_id: int, request: Request, page: int = Query(1, ge=1)
 
 @app.get("/journal", response_class=HTMLResponse)
 async def journal_page(request: Request, page: int = Query(1, ge=1)):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
     logger.info("Journal page accessed")
     db = SessionLocal()
     per_page = 10
@@ -391,6 +456,10 @@ async def add_journal(
 
 @app.get("/logs", response_class=HTMLResponse)
 async def logs_page(request: Request, page: int = Query(1, ge=1)):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
     logger.info("Logs page accessed")
     db = SessionLocal()
     per_page = 10
