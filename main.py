@@ -1,8 +1,9 @@
 import logging
 import hashlib
 import secrets
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, Request, HTTPException, Form, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -19,6 +20,13 @@ logging.basicConfig(
     handlers=[logging.FileHandler("stash.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
+
+LOCAL_TZ = ZoneInfo("Europe/Warsaw")
+
+
+def local_now():
+    return datetime.now(LOCAL_TZ)
+
 
 DATABASE_URL = "sqlite:///stash.db"
 Base = declarative_base()
@@ -41,7 +49,7 @@ class Task(Base):
     user_id = Column(Integer, index=True)
     content = Column(String)
     is_done = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=local_now)
     completed_at = Column(DateTime, nullable=True)
 
 
@@ -50,7 +58,7 @@ class Journal(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, index=True)
     content = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=local_now)
 
 
 class ActivityLog(Base):
@@ -58,7 +66,7 @@ class ActivityLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, index=True)
     description = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=local_now)
 
 
 def hash_password(password: str) -> str:
@@ -295,7 +303,7 @@ async def toggle_task(task_id: int, request: Request, page: int = Query(1, ge=1)
     task = db.query(Task).filter(Task.id == task_id).first()
     if task:
         task.is_done = not task.is_done
-        task.completed_at = datetime.utcnow() if task.is_done else None
+        task.completed_at = local_now() if task.is_done else None
         db.commit()
         log_activity(ADMIN_ID, f"Toggled task: {task.content[:30]}")
     per_page = 8
