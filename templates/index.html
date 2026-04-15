@@ -1,22 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="w-full">
     <h1 class="text-3xl font-semibold text-gray-800 mb-8">Dashboard</h1>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="card p-6">
-            <p class="text-sm text-gray-500 mb-1">Total Tasks</p>
-            <p class="text-3xl font-medium text-gray-800">{{ tasks_count }}</p>
-        </div>
-        <div class="card p-6">
-            <p class="text-sm text-gray-500 mb-1">Completed</p>
-            <p class="text-3xl font-medium text-gray-800">{{ completed_count }}</p>
-        </div>
-        <div class="card p-6">
-            <p class="text-sm text-gray-500 mb-1">Journal Entries</p>
-            <p class="text-3xl font-medium text-gray-800">{{ journal_count }}</p>
-        </div>
+        <a href="/tasks" class="block">
+            <div class="card p-8 text-center items-center hover:scale-[1.03] transition-all shadow-lg cursor-pointer">
+                <div class="border-t-4 border-blue-500 w-full pt-4">
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Total Tasks</p>
+                    <p class="text-5xl font-semibold text-gray-800 mt-2">{{ tasks_count }}</p>
+                </div>
+            </div>
+        </a>
+        <a href="/tasks" class="block">
+            <div class="card p-8 text-center items-center hover:scale-[1.03] transition-all shadow-lg cursor-pointer">
+                <div class="border-t-4 border-green-500 w-full pt-4">
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Completed</p>
+                    <p class="text-5xl font-semibold text-gray-800 mt-2">{{ completed_count }}</p>
+                </div>
+            </div>
+        </a>
+        <a href="/journal" class="block">
+            <div class="card p-8 text-center items-center hover:scale-[1.03] transition-all shadow-lg cursor-pointer">
+                <div class="border-t-4 border-purple-500 w-full pt-4">
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Journal</p>
+                    <p class="text-5xl font-semibold text-gray-800 mt-2">{{ journal_count }}</p>
+                </div>
+            </div>
+        </a>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -71,5 +82,4 @@
             {% endfor %}
         </div>
     </div>
-</div>
 {% endblock %}
