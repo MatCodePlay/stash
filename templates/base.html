@@ -35,11 +35,12 @@
                 <a href="/" class="nav-item block text-sm text-gray-700" id="nav-dashboard">Dashboard</a>
                 <a href="/tasks" class="nav-item block text-sm text-gray-700" id="nav-tasks">Tasks</a>
                 <a href="/journal" class="nav-item block text-sm text-gray-700" id="nav-journal">Journal</a>
+                <a href="/blueprints" class="nav-item block text-sm text-gray-700" id="nav-blueprints">Blueprints</a>
                 <a href="/logs" class="nav-item block text-sm text-gray-700" id="nav-logs">Activity</a>
             </nav>
             <script>
                 const path = window.location.pathname;
-                const map = {'/': 'nav-dashboard', '/tasks': 'nav-tasks', '/journal': 'nav-journal', '/logs': 'nav-logs'};
+                const map = {'/': 'nav-dashboard', '/tasks': 'nav-tasks', '/journal': 'nav-journal', '/blueprints': 'nav-blueprints', '/logs': 'nav-logs'};
                 const activeId = map[path] || 'nav-dashboard';
                 document.getElementById(activeId)?.classList.add('active');
             </script>

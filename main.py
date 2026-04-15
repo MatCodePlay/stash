@@ -6,7 +6,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, Request, HTTPException, Form, Query
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -66,6 +66,26 @@ class ActivityLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, index=True)
     description = Column(String)
+    created_at = Column(DateTime, default=local_now)
+
+
+class Blueprint(Base):
+    __tablename__ = "blueprints"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True)
+    title = Column(String)
+    description = Column(Text)
+    color_theme = Column(String, default="#0071e3")
+
+
+class BlueprintNode(Base):
+    __tablename__ = "blueprint_nodes"
+    id = Column(Integer, primary_key=True, index=True)
+    blueprint_id = Column(Integer, index=True)
+    title = Column(String)
+    status = Column(String, default="New")
+    url = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=local_now)
 
 
@@ -487,6 +507,140 @@ async def logs_page(request: Request, page: int = Query(1, ge=1)):
         "logs.html",
         {"request": request, "logs": logs, "page": page, "total_pages": total_pages},
     )
+
+
+@app.get("/blueprints", response_class=HTMLResponse)
+async def blueprints_page(request: Request):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
+    logger.info("Blueprints page accessed")
+    db = SessionLocal()
+    blueprints = db.query(Blueprint).filter(Blueprint.user_id == ADMIN_ID).all()
+    db.close()
+    return templates.TemplateResponse(
+        "blueprints.html", {"request": request, "blueprints": blueprints}
+    )
+
+
+@app.post("/blueprints", response_class=HTMLResponse)
+async def add_blueprint(
+    request: Request,
+    title: str = Form(...),
+    description: str = Form(""),
+):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
+    db = SessionLocal()
+    blueprint = Blueprint(user_id=ADMIN_ID, title=title, description=description)
+    db.add(blueprint)
+    db.commit()
+    db.refresh(blueprint)
+    log_activity(ADMIN_ID, f"Added blueprint: {title}")
+    db.close()
+    return Response(headers={"HX-Redirect": f"/blueprints/{blueprint.id}"})
+
+
+@app.get("/blueprints/{blueprint_id}", response_class=HTMLResponse)
+async def blueprint_detail(request: Request, blueprint_id: int):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
+    db = SessionLocal()
+    blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
+    from sqlalchemy import case
+
+    priority = case(
+        (BlueprintNode.status == "New", 0),
+        (BlueprintNode.status == "In Progress", 1),
+        (BlueprintNode.status == "Completed", 2),
+        (BlueprintNode.status == "Rejected", 3),
+        else_=4,
+    )
+    nodes = (
+        db.query(BlueprintNode)
+        .filter(BlueprintNode.blueprint_id == blueprint_id)
+        .order_by(priority, BlueprintNode.created_at.desc())
+        .all()
+    )
+    db.close()
+    return templates.TemplateResponse(
+        "blueprint_detail.html",
+        {"request": request, "blueprint": blueprint, "nodes": nodes},
+    )
+
+
+@app.post("/blueprints/{blueprint_id}/status/{node_id}", response_class=HTMLResponse)
+async def update_node_status(
+    request: Request,
+    blueprint_id: int,
+    node_id: int,
+    status: str = Form(...),
+):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
+    db = SessionLocal()
+    node = db.query(BlueprintNode).filter(BlueprintNode.id == node_id).first()
+    if node:
+        node.status = status
+        db.commit()
+        log_activity(ADMIN_ID, f"Updated node status to {status}")
+
+    blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
+    from sqlalchemy import case
+
+    priority = case(
+        (BlueprintNode.status == "New", 0),
+        (BlueprintNode.status == "In Progress", 1),
+        (BlueprintNode.status == "Completed", 2),
+        (BlueprintNode.status == "Rejected", 3),
+        else_=4,
+    )
+    nodes = (
+        db.query(BlueprintNode)
+        .filter(BlueprintNode.blueprint_id == blueprint_id)
+        .order_by(priority, BlueprintNode.created_at.desc())
+        .all()
+    )
+    db.close()
+    return templates.TemplateResponse(
+        "_node_card.html",
+        {"request": request, "blueprint": blueprint, "nodes": [node]},
+    )
+
+
+@app.post("/blueprints/{blueprint_id}", response_class=HTMLResponse)
+async def add_blueprint_node(
+    request: Request,
+    blueprint_id: int,
+    title: str = Form(...),
+    status: str = Form("New"),
+    url: str = Form(""),
+    notes: str = Form(""),
+):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
+    db = SessionLocal()
+    node = BlueprintNode(
+        blueprint_id=blueprint_id,
+        title=title,
+        status=status,
+        url=url if url else None,
+        notes=notes if notes else None,
+    )
+    db.add(node)
+    db.commit()
+    log_activity(ADMIN_ID, f"Added node to blueprint {blueprint_id}")
+    db.close()
+    return Response(headers={"HX-Redirect": f"/blueprints/{blueprint_id}"})
 
 
 if __name__ == "__main__":
