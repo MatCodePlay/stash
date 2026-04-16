@@ -173,7 +173,7 @@ def login_required(request: Request):
 async def login_page(request: Request, error: str | None = None):
     logger.info("Login page accessed")
     return templates.TemplateResponse(
-        "login.html", {"request": request, "error": error}
+        request=request, name="login.html", context={"error": error}
     )
 
 
@@ -191,7 +191,9 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
         return RedirectResponse(url="/", status_code=302)
 
     return templates.TemplateResponse(
-        "login.html", {"request": request, "error": "Invalid email or password"}
+        request=request,
+        name="login.html",
+        context={"error": "Invalid email or password"},
     )
 
 
@@ -224,9 +226,9 @@ async def index(request: Request):
     )
     db.close()
     return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
+        request=request,
+        name="index.html",
+        context={
             "tasks_count": tasks_count,
             "completed_count": completed_count,
             "journal_count": journal_count,
@@ -263,15 +265,20 @@ async def tasks_page(request: Request, page: int = Query(1, ge=1)):
     all_tasks = active + completed
     tasks = all_tasks[offset : offset + per_page]
     db.close()
+    if is_htmx(request):
+        return templates.TemplateResponse(
+            request=request,
+            name="_tasks_list.html",
+            context={
+                "tasks": tasks,
+                "page": page,
+                "total_pages": total_pages,
+            },
+        )
     return templates.TemplateResponse(
-        "tasks.html",
-        {
-            "request": request,
-            "tasks": tasks,
-            "page": page,
-            "total_pages": total_pages,
-            "per_page": per_page,
-        },
+        request=request,
+        name="tasks.html",
+        context={"tasks": tasks, "page": page, "total_pages": total_pages},
     )
 
 
@@ -311,17 +318,18 @@ async def add_task(
     db.close()
     if is_htmx(request):
         return templates.TemplateResponse(
-            "_tasks_list.html",
-            {
-                "request": request,
+            request=request,
+            name="_tasks_list.html",
+            context={
                 "tasks": tasks,
                 "page": page,
                 "total_pages": total_pages,
             },
         )
     return templates.TemplateResponse(
-        "tasks.html",
-        {"request": request, "tasks": tasks, "page": page, "total_pages": total_pages},
+        request=request,
+        name="tasks.html",
+        context={"tasks": tasks, "page": page, "total_pages": total_pages},
     )
 
 
@@ -356,17 +364,18 @@ async def toggle_task(task_id: int, request: Request, page: int = Query(1, ge=1)
     db.close()
     if is_htmx(request):
         return templates.TemplateResponse(
-            "_tasks_list.html",
-            {
-                "request": request,
+            request=request,
+            name="_tasks_list.html",
+            context={
                 "tasks": tasks,
                 "page": page,
                 "total_pages": total_pages,
             },
         )
     return templates.TemplateResponse(
-        "tasks.html",
-        {"request": request, "tasks": tasks, "page": page, "total_pages": total_pages},
+        request=request,
+        name="tasks.html",
+        context={"tasks": tasks, "page": page, "total_pages": total_pages},
     )
 
 
@@ -401,17 +410,18 @@ async def delete_task(task_id: int, request: Request, page: int = Query(1, ge=1)
     db.close()
     if is_htmx(request):
         return templates.TemplateResponse(
-            "_tasks_list.html",
-            {
-                "request": request,
+            request=request,
+            name="_tasks_list.html",
+            context={
                 "tasks": tasks,
                 "page": page,
                 "total_pages": total_pages,
             },
         )
     return templates.TemplateResponse(
-        "tasks.html",
-        {"request": request, "tasks": tasks, "page": page, "total_pages": total_pages},
+        request=request,
+        name="tasks.html",
+        context={"tasks": tasks, "page": page, "total_pages": total_pages},
     )
 
 
@@ -437,9 +447,9 @@ async def journal_page(request: Request, page: int = Query(1, ge=1)):
     )
     db.close()
     return templates.TemplateResponse(
-        "journal.html",
-        {
-            "request": request,
+        request=request,
+        name="journal.html",
+        context={
             "entries": entries,
             "page": page,
             "total_pages": total_pages,
@@ -472,18 +482,18 @@ async def add_journal(
     db.close()
     if is_htmx(request):
         return templates.TemplateResponse(
-            "_journal_list.html",
-            {
-                "request": request,
+            request=request,
+            name="_journal_list.html",
+            context={
                 "entries": entries,
                 "page": page,
                 "total_pages": total_pages,
             },
         )
     return templates.TemplateResponse(
-        "journal.html",
-        {
-            "request": request,
+        request=request,
+        name="journal.html",
+        context={
             "entries": entries,
             "page": page,
             "total_pages": total_pages,
@@ -513,8 +523,9 @@ async def logs_page(request: Request, page: int = Query(1, ge=1)):
     )
     db.close()
     return templates.TemplateResponse(
-        "logs.html",
-        {"request": request, "logs": logs, "page": page, "total_pages": total_pages},
+        request=request,
+        name="logs.html",
+        context={"logs": logs, "page": page, "total_pages": total_pages},
     )
 
 
@@ -529,7 +540,9 @@ async def blueprints_page(request: Request):
     blueprints = db.query(Blueprint).filter(Blueprint.user_id == ADMIN_ID).all()
     db.close()
     return templates.TemplateResponse(
-        "blueprints.html", {"request": request, "blueprints": blueprints}
+        request=request,
+        name="blueprints.html",
+        context={"blueprints": blueprints},
     )
 
 
@@ -587,9 +600,9 @@ async def blueprint_detail(request: Request, blueprint_id: int):
 
     db.close()
     return templates.TemplateResponse(
-        "blueprint_detail.html",
-        {
-            "request": request,
+        request=request,
+        name="blueprint_detail.html",
+        context={
             "blueprint": blueprint,
             "active_nodes": active_nodes,
             "archive_nodes": archive_nodes,
@@ -621,8 +634,9 @@ async def update_node_notes(
     blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
 
     return templates.TemplateResponse(
-        "_node_single.html",
-        {"request": request, "blueprint": blueprint, "node": node},
+        request=request,
+        name="_node_single.html",
+        context={"blueprint": blueprint, "node": node},
     )
 
 
@@ -669,11 +683,10 @@ async def update_node_status(
         .all()
     )
 
-    db.close()
     return templates.TemplateResponse(
-        "_nodes_list.html",
-        {
-            "request": request,
+        request=request,
+        name="_nodes_list.html",
+        context={
             "blueprint": blueprint,
             "active_nodes": active_nodes,
             "archive_nodes": archive_nodes,
@@ -731,11 +744,10 @@ async def add_blueprint_node(
         .all()
     )
 
-    db.close()
     return templates.TemplateResponse(
-        "_nodes_list.html",
-        {
-            "request": request,
+        request=request,
+        name="_nodes_list.html",
+        context={
             "blueprint": blueprint,
             "active_nodes": active_nodes,
             "archive_nodes": archive_nodes,
@@ -767,8 +779,9 @@ async def update_node_notes(
     blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
 
     return templates.TemplateResponse(
-        "_node_single.html",
-        {"request": request, "blueprint": blueprint, "node": node},
+        request=request,
+        name="_node_single.html",
+        context={"blueprint": blueprint, "node": node},
     )
 
 
