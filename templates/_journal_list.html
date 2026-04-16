@@ -1,15 +1,15 @@
-<div id="journal-list" class="apple-grid" style="gap: 16px;">
+<div id="journal-list" class="stash-grid">
     {% for entry in entries %}
-    <div class="apple-card" style="padding: 1.5rem;">
-        <div class="flex items-start gap-4">
-            <div class="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+    <div class="stash-card">
+        <div class="stash-flex-center stash-flex-start">
+            <div class="stash-journal-dot"></div>
             <div class="flex-1">
-                <p class="text-gray-700 whitespace-pre-wrap">{{ entry.content }}</p>
-                <p class="apple-text-sm mt-3">{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p class="stash-journal-content whitespace-pre-wrap">{{ entry.content }}</p>
+                <p class="stash-text-sm mt-3">{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
             </div>
         </div>
     </div>
     {% else %}
-    <div class="apple-empty apple-card">No journal entries yet. Start writing!</div>
+    <div class="stash-empty stash-card">No journal entries yet. Start writing!</div>
     {% endfor %}
 </div>

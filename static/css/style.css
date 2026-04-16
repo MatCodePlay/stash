@@ -1,29 +1,31 @@
 :root {
-    --apple-bg: #F5F5F7;
+    --apple-bg: rgb(205, 210, 212);
     --apple-card: #FFFFFF;
-    --apple-border: rgba(0, 0, 0, 0.08);
+    --apple-border: rgba(0, 0, 0, 0.15);
     --apple-text-main: #1D1D1F;
     --apple-text-sec: #6E6E73;
     --apple-blue: #007AFF;
-    --apple-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
-}
-
-body {
-    background-color: var(--apple-bg);
-    color: var(--apple-text-main);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
-    margin: 0;
-    padding: 0;
+    --apple-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    --apple-input-bg: rgba(255, 255, 255, 0.9);
 }
 
 * {
     box-sizing: border-box;
 }
 
+body {
+    background-color: var(--apple-bg) !important;
+    color: var(--apple-text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
 /* Global Card Style */
 .apple-card {
-    background: var(--apple-card);
-    border: 1px solid var(--apple-border);
+    background: var(--apple-card) !important;
+    border: 1px solid var(--apple-border) !important;
     border-radius: 24px;
     box-shadow: var(--apple-shadow);
     padding: 2rem;
@@ -36,8 +38,8 @@ body {
 
 /* Form Inputs & Textareas */
 .apple-input {
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid var(--apple-border);
+    background: var(--apple-input-bg) !important;
+    border: 1px solid var(--apple-border) !important;
     border-radius: 12px;
     padding: 12px 16px;
     width: 100%;
@@ -52,9 +54,9 @@ body {
 }
 
 .apple-input:focus {
-    background: white;
+    background: white !important;
     border-color: var(--apple-blue) !important;
-    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
     outline: none;
 }
 
@@ -72,20 +74,20 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--apple-blue);
-    color: white;
+    background: var(--apple-blue) !important;
+    color: white !important;
     font-weight: 500;
     padding: 10px 20px;
     border-radius: 12px;
     transition: all 0.2s ease;
     text-decoration: none;
-    border: none;
+    border: none !important;
     cursor: pointer;
     font-size: 14px;
 }
 
 .apple-button:hover {
-    background: #0063CC;
+    background: #0063CC !important;
     transform: translateY(-1px);
 }
 
@@ -104,21 +106,21 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    color: var(--apple-text-sec);
+    background: transparent !important;
+    color: var(--apple-text-sec) !important;
     font-weight: 500;
     padding: 10px 20px;
     border-radius: 12px;
     transition: all 0.2s ease;
     text-decoration: none;
-    border: 1px solid var(--apple-border);
+    border: 1px solid var(--apple-border) !important;
     cursor: pointer;
     font-size: 14px;
 }
 
 .apple-button-secondary:hover {
-    background: rgba(0, 0, 0, 0.03);
-    color: var(--apple-text-main);
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--apple-text-main) !important;
 }
 
 /* Status Badge */
@@ -131,6 +133,8 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    cursor: pointer;
+    position: relative;
 }
 
 .apple-badge-new {
@@ -139,18 +143,77 @@ body {
 }
 
 .apple-badge-progress {
-    background: rgba(0, 122, 255, 0.1);
+    background: rgba(0, 122, 255, 0.15);
     color: #007AFF;
 }
 
 .apple-badge-completed {
-    background: rgba(52, 199, 89, 0.1);
+    background: rgba(52, 199, 89, 0.15);
     color: #34C759;
 }
 
 .apple-badge-rejected {
-    background: rgba(255, 59, 48, 0.1);
+    background: rgba(255, 59, 48, 0.15);
     color: #FF3B30;
+}
+
+/* Dropdown Menu - Fixed positioning with invisible bridge */
+.dropdown-menu {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    margin-top: 0 !important;
+    padding-top: 8px;
+    z-index: 100;
+    min-width: 120px;
+}
+
+.dropdown-menu::before {
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: 0;
+    right: 0;
+    height: 15px;
+    background: transparent;
+}
+
+.dropdown-content {
+    background: white !important;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--apple-border) !important;
+    padding: 4px;
+    min-width: 120px;
+    margin-top: 0 !important;
+}
+
+.dropdown-content::before {
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: 0;
+    right: 0;
+    height: 15px;
+    background: transparent;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--apple-text-main);
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.05);
 }
 
 /* Page Title */
@@ -176,7 +239,7 @@ body {
 
 /* Links */
 .apple-link {
-    color: var(--apple-blue);
+    color: var(--apple-blue) !important;
     text-decoration: none;
     font-weight: 500;
 }
@@ -205,6 +268,10 @@ body {
     border: 2px solid var(--apple-border);
     cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .apple-checkbox.checked {
@@ -217,6 +284,9 @@ body {
     color: var(--apple-text-sec);
     cursor: pointer;
     transition: color 0.2s ease;
+    background: none;
+    border: none;
+    padding: 4px;
 }
 
 .apple-delete:hover {
@@ -225,7 +295,7 @@ body {
 
 /* Section Divider */
 .apple-divider {
-    border-top: 1px solid var(--apple-border);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     margin: 24px 0;
 }
 
@@ -272,4 +342,9 @@ body {
     .apple-grid-3 {
         grid-template-columns: 1fr;
     }
+}
+
+/* Sidebar fix - darker to match */
+.sidebar {
+    background-color: var(--apple-bg) !important;
 }

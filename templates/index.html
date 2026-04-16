@@ -1,79 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="apple-page-title">Dashboard</h1>
-    
-    <div class="apple-grid apple-grid-3 mb-8">
-        <a href="/tasks" class="block">
-            <div class="apple-card text-center" style="border-top: 4px solid #007AFF;">
-                <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Total Tasks</p>
-                <p class="text-5xl font-semibold text-gray-800 mt-2">{{ tasks_count }}</p>
-            </div>
-        </a>
-        <a href="/tasks" class="block">
-            <div class="apple-card text-center" style="border-top: 4px solid #34C759;">
-                <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Completed</p>
-                <p class="text-5xl font-semibold text-gray-800 mt-2">{{ completed_count }}</p>
-            </div>
-        </a>
-        <a href="/journal" class="block">
-            <div class="apple-card text-center" style="border-top: 4px solid #AF52DE;">
-                <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Journal</p>
-                <p class="text-5xl font-semibold text-gray-800 mt-2">{{ journal_count }}</p>
-            </div>
-        </a>
-    </div>
-
-    <div class="apple-grid apple-grid-3 mb-8">
-        <a href="/tasks" class="apple-card flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
-            </div>
-            <div>
-                <p class="font-semibold text-gray-800">Tasks</p>
-                <p class="apple-text-sm">Manage your tasks</p>
-            </div>
-        </a>
-        <a href="/journal" class="apple-card flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
-            </div>
-            <div>
-                <p class="font-semibold text-gray-800">Journal</p>
-                <p class="apple-text-sm">Write your thoughts</p>
-            </div>
-        </a>
-        <a href="/logs" class="apple-card flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <div>
-                <p class="font-semibold text-gray-800">Activity</p>
-                <p class="apple-text-sm">View recent activity</p>
-            </div>
-        </a>
-    </div>
-
-    <div class="apple-card">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-semibold text-gray-800">Recent Activity</h2>
-            <a href="/logs" class="apple-link">View all</a>
+    <div class="stash-page-container">
+        <h1 class="stash-page-title">Dashboard</h1>
+        
+        <div class="stash-grid stash-grid-3">
+            <a href="/tasks" class="stash-card stash-stat-card">
+                <p class="stash-stat-label">Total Tasks</p>
+                <p class="stash-stat-value">{{ tasks_count }}</p>
+            </a>
+            <a href="/tasks" class="stash-card stash-stat-card-green">
+                <p class="stash-stat-label">Completed</p>
+                <p class="stash-stat-value">{{ completed_count }}</p>
+            </a>
+            <a href="/journal" class="stash-card stash-stat-card-purple">
+                <p class="stash-stat-label">Journal</p>
+                <p class="stash-stat-value">{{ journal_count }}</p>
+            </a>
         </div>
-        <div class="space-y-3">
-            {% for log in recent_logs %}
-            <div class="flex justify-between items-center py-3 apple-divider">
-                <span class="text-gray-700">{{ log.description }}</span>
-                <span class="apple-text-sm">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+
+        <div class="stash-grid stash-grid-3">
+            <a href="/tasks" class="stash-card stash-icon-card">
+                <div class="stash-icon-wrapper-blue">
+                    <svg class="stash-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="stash-card-title-sm">Tasks</p>
+                    <p class="stash-text-sm">Manage your tasks</p>
+                </div>
+            </a>
+            <a href="/journal" class="stash-card stash-icon-card">
+                <div class="stash-icon-wrapper-green">
+                    <svg class="stash-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="stash-card-title-sm">Journal</p>
+                    <p class="stash-text-sm">Write your thoughts</p>
+                </div>
+            </a>
+            <a href="/logs" class="stash-card stash-icon-card">
+                <div class="stash-icon-wrapper-purple">
+                    <svg class="stash-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="stash-card-title-sm">Activity</p>
+                    <p class="stash-text-sm">View recent activity</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="stash-card">
+            <div class="stash-flex-between mb-6">
+                <h2 class="stash-card-title-sm">Recent Activity</h2>
+                <a href="/logs" class="stash-link">View all</a>
             </div>
-            {% else %}
-            <p class="apple-text-sm">No recent activity</p>
-            {% endfor %}
+            <div>
+                {% for log in recent_logs %}
+                <div class="stash-flex-between stash-activity-row">
+                    <span class="stash-activity-text">{{ log.description }}</span>
+                    <span class="stash-text-sm">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% else %}
+                <p class="stash-text-sm">No recent activity</p>
+                {% endfor %}
+            </div>
         </div>
     </div>
 {% endblock %}

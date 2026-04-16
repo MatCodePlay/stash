@@ -1,45 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="apple-page-title">Blueprints</h1>
-    </div>
+    <div class="stash-page-container">
+        <h1 class="stash-page-title">Blueprints</h1>
 
-    <div class="apple-card mb-8">
-        <form hx-post="/blueprints" class="space-y-4">
-            <div class="apple-form-group">
-                <input type="text" name="title" id="bp-title" placeholder="Blueprint title..." required class="apple-input">
-            </div>
-            <div class="apple-form-group">
-                <input type="text" name="description" placeholder="Description (optional)..." class="apple-input">
-            </div>
-            <div class="flex justify-end">
-                <button type="submit" id="bp-submit" class="apple-button" disabled>Create Blueprint</button>
-            </div>
-        </form>
-        <script>
-            const bpTitle = document.getElementById('bp-title');
-            const bpSubmit = document.getElementById('bp-submit');
-            bpTitle.addEventListener('input', function() {
-                bpSubmit.disabled = !this.value.trim();
-            });
-            document.querySelector('form[hx-post="/blueprints"]').addEventListener('htmx:afterRequest', function() {
-                bpTitle.value = '';
-                bpSubmit.disabled = true;
-            });
-        </script>
-    </div>
-
-    <div id="blueprints-list" class="apple-grid apple-grid-2">
-        {% for bp in blueprints %}
-        <a href="/blueprints/{{ bp.id }}" class="apple-card group" style="border-top: 4px solid #0071e3;">
-            <h3 class="apple-card-title group-hover:text-blue-600">{{ bp.title }}</h3>
-            <p class="apple-text-sm mt-3">{{ bp.description or 'No description' }}</p>
-        </a>
-        {% else %}
-        <div class="col-span-2 apple-empty apple-card">
-            No blueprints yet. Create one above!
+        <div class="stash-card">
+            <form hx-post="/blueprints" class="stash-form-split">
+                <div class="stash-form-group">
+                    <input type="text" name="title" id="bp-title" placeholder="Blueprint title..." required class="stash-input">
+                </div>
+                <div class="stash-form-group">
+                    <input type="text" name="description" placeholder="Description (optional)..." class="stash-input">
+                </div>
+                <div class="stash-flex justify-end">
+                    <button type="submit" id="bp-submit" class="stash-button" disabled>Create Blueprint</button>
+                </div>
+            </form>
+            <script>
+                const bpTitle = document.getElementById('bp-title');
+                const bpSubmit = document.getElementById('bp-submit');
+                bpTitle.addEventListener('input', function() {
+                    bpSubmit.disabled = !this.value.trim();
+                });
+                document.querySelector('form[hx-post="/blueprints"]').addEventListener('htmx:afterRequest', function() {
+                    bpTitle.value = '';
+                    bpSubmit.disabled = true;
+                });
+            </script>
         </div>
-        {% endfor %}
+
+        <div id="blueprints-list" class="stash-grid stash-grid-2">
+            {% for bp in blueprints %}
+            <a href="/blueprints/{{ bp.id }}" class="stash-card stash-card-accent">
+                <h3 class="stash-card-title">{{ bp.title }}</h3>
+                <p class="stash-text-sm mt-3">{{ bp.description or 'No description' }}</p>
+            </a>
+            {% else %}
+            <div class="col-span-2 stash-empty stash-card">
+                No blueprints yet. Create one above!
+            </div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}

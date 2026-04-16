@@ -597,6 +597,35 @@ async def blueprint_detail(request: Request, blueprint_id: int):
     )
 
 
+@app.post(
+    "/blueprints/{blueprint_id}/nodes/{node_id}/update_notes",
+    response_class=HTMLResponse,
+)
+async def update_node_notes(
+    request: Request,
+    blueprint_id: int,
+    node_id: int,
+    notes: str = Form(""),
+):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
+    db = SessionLocal()
+    node = db.query(BlueprintNode).filter(BlueprintNode.id == node_id).first()
+    if node:
+        node.notes = notes if notes else None
+        db.commit()
+        log_activity(ADMIN_ID, f"Updated notes for node {node_id}")
+
+    blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
+
+    return templates.TemplateResponse(
+        "_node_single.html",
+        {"request": request, "blueprint": blueprint, "node": node},
+    )
+
+
 @app.post("/blueprints/{blueprint_id}/status/{node_id}", response_class=HTMLResponse)
 async def update_node_status(
     request: Request,
@@ -737,7 +766,6 @@ async def update_node_notes(
 
     blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
 
-    db.close()
     return templates.TemplateResponse(
         "_node_single.html",
         {"request": request, "blueprint": blueprint, "node": node},

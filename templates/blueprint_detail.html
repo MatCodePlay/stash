@@ -1,38 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="flex justify-between items-start mb-8">
-        <div>
-            <a href="/blueprints" class="apple-link mb-2 block">&larr; Back to Blueprints</a>
-            <h1 class="apple-page-title" style="border-left: 4px solid #0071e3; padding-left: 12px;">{{ blueprint.title }}</h1>
-            <p class="apple-text-sm mt-2">{{ blueprint.description }}</p>
+    <div class="stash-page-container">
+        <div class="stash-header">
+            <a href="/blueprints" class="stash-back-link">&larr; Back to Blueprints</a>
+            <h1 class="stash-page-title-accent">{{ blueprint.title }}</h1>
+            <p class="stash-text-sm">{{ blueprint.description }}</p>
         </div>
-    </div>
 
-    <div class="apple-card mb-8">
-        <label class="apple-label mb-4 block">Add New Node</label>
-        <form hx-post="/blueprints/{{ blueprint.id }}" hx-target="#nodes-container" hx-swap="innerHTML" id="node-form">
-            <div class="apple-form-row mb-4">
-                <input type="text" name="title" id="node-title" placeholder="Node title..." required class="apple-input">
-                <input type="text" name="url" id="node-url" placeholder="URL (optional)..." class="apple-input">
-            </div>
-            <div class="apple-form-group mb-4">
-                <textarea name="notes" id="node-notes" rows="2" placeholder="Notes..." class="apple-input"></textarea>
-            </div>
-            <div class="flex justify-end">
-                <button type="submit" class="apple-button">Add Node</button>
-            </div>
-        </form>
-        <script>
-            document.getElementById('node-form').addEventListener('htmx:afterRequest', function() {
-                document.getElementById('node-title').value = '';
-                document.getElementById('node-url').value = '';
-                document.getElementById('node-notes').value = '';
-            });
-        </script>
-    </div>
+        <div class="stash-card">
+            <label class="stash-label">Add New Node</label>
+            <form hx-post="/blueprints/{{ blueprint.id }}" hx-target="#nodes-container" hx-swap="innerHTML" id="node-form">
+                <div class="stash-form-row">
+                    <input type="text" name="title" id="node-title" placeholder="Node title..." required class="stash-input">
+                    <input type="text" name="url" id="node-url" placeholder="URL (optional)..." class="stash-input">
+                </div>
+                <div class="stash-form-group">
+                    <textarea name="notes" id="node-notes" rows="2" placeholder="Notes..." class="stash-textarea"></textarea>
+                </div>
+                <div class="stash-flex justify-end">
+                    <button type="submit" class="stash-button">Add Node</button>
+                </div>
+            </form>
+            <script>
+                document.getElementById('node-form').addEventListener('htmx:afterRequest', function() {
+                    document.getElementById('node-title').value = '';
+                    document.getElementById('node-url').value = '';
+                    document.getElementById('node-notes').value = '';
+                });
+            </script>
+        </div>
 
-    <div id="nodes-container">
-        {% include "_nodes_list.html" %}
+        <div id="nodes-container">
+            {% include "_nodes_list.html" %}
+        </div>
     </div>
 {% endblock %}

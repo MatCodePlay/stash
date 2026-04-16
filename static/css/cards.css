@@ -1,0 +1,441 @@
+.stash-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stash-page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.stash-page-title {
+    margin: 0;
+}
+
+.stash-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stash-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+}
+
+.stash-card-accent {
+    border-top: 4px solid #0071e3;
+}
+
+.stash-card-success {
+    border-left: 4px solid #34C759;
+}
+
+.stash-card-rejected {
+    border-left: 4px solid #FF3B30;
+}
+
+.stash-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--stash-blue);
+}
+
+.stash-link-icon {
+    display: inline;
+    margin-left: 4px;
+}
+
+.stash-card-title-sm {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--stash-text);
+}
+
+.stash-stat-card {
+    border-top: 4px solid #007AFF;
+    text-align: center;
+}
+
+.stash-stat-card-green {
+    border-top: 4px solid #34C759;
+    text-align: center;
+}
+
+.stash-stat-card-purple {
+    border-top: 4px solid #AF52DE;
+    text-align: center;
+}
+
+.stash-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #86868b;
+}
+
+.stash-stat-value {
+    font-size: 48px;
+    font-weight: 600;
+    color: var(--stash-text);
+    margin-top: 8px;
+}
+
+.stash-icon-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.stash-icon-wrapper-blue {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: rgba(0, 122, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #007AFF;
+}
+
+.stash-icon-wrapper-green {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: rgba(52, 199, 89, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #34C759;
+}
+
+.stash-icon-wrapper-purple {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: rgba(175, 82, 222, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #AF52DE;
+}
+
+.stash-activity-row {
+    padding: 12px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.stash-activity-text {
+    color: var(--stash-text);
+}
+
+.stash-form-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.stash-form-row .stash-input {
+    flex: 1;
+}
+
+.stash-task-text {
+    font-size: 18px;
+    color: var(--stash-text);
+}
+
+.stash-task-done {
+    color: #a1a1a6;
+    text-decoration: line-through;
+}
+
+.stash-task-meta {
+    margin-top: 8px;
+    margin-left: 40px;
+}
+
+.stash-journal-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #007AFF;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.stash-journal-content {
+    color: var(--stash-text);
+}
+
+.stash-table-wrapper {
+    padding: 0;
+    overflow: hidden;
+}
+
+.stash-table-text {
+    font-size: 14px;
+    color: var(--stash-text);
+}
+
+.stash-table-text-sec {
+    font-size: 14px;
+    color: var(--stash-text-sec);
+}
+
+.stash-table-empty {
+    text-align: center;
+    font-size: 14px;
+    color: var(--stash-text-sec);
+    padding: 32px;
+}
+
+.stash-back-link {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--stash-blue);
+}
+
+.stash-page-title-accent {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--stash-text);
+    border-left: 4px solid #0071e3;
+    padding-left: 12px;
+}
+
+.stash-page-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--stash-text);
+    margin-bottom: 24px;
+}
+
+.stash-card-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--stash-text);
+}
+
+.stash-text-sm {
+    font-size: 14px;
+    color: var(--stash-text-sec);
+}
+
+.stash-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: 1px solid;
+}
+
+.stash-badge-new {
+    background: transparent;
+    border-color: #86868b;
+    color: #86868b;
+}
+
+.stash-badge-progress {
+    background: transparent;
+    border-color: #007AFF;
+    color: #007AFF;
+}
+
+.stash-badge-completed {
+    background: transparent;
+    border-color: #34C759;
+    color: #34C759;
+}
+
+.stash-badge-rejected {
+    background: transparent;
+    border-color: #FF3B30;
+    color: #FF3B30;
+}
+
+.stash-divider {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    margin: 24px 0;
+}
+
+.stash-empty {
+    text-align: center;
+    color: var(--stash-text-sec);
+    padding: 48px 24px;
+}
+
+.stash-grid {
+    display: grid;
+    gap: 24px;
+}
+
+.stash-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.stash-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+    .stash-grid-2,
+    .stash-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stash-flex {
+    display: flex;
+}
+
+.stash-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stash-flex-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.login-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--stash-text);
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: var(--stash-text-sec);
+    margin-bottom: 32px;
+}
+
+.login-error {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #FF3B30;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+.login-form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--stash-text);
+    margin-bottom: 8px;
+}
+
+.login-form-group {
+    margin-bottom: 20px;
+}
+
+.stash-login-card {
+    padding: 40px;
+}
+
+.stash-button-full {
+    width: 100%;
+}
+
+.stash-checkbox-icon {
+    color: white;
+}
+
+.stash-flex-start {
+    align-items: flex-start;
+}
+
+.stash-grid-sm {
+    gap: 16px;
+}
+
+.stash-grid-lg {
+    gap: 24px;
+}
+
+.stash-flex-start {
+    align-items: flex-start;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+.mb-2 {
+    margin-bottom: 8px;
+}
+
+.mb-4 {
+    margin-bottom: 16px;
+}
+
+.mt-3 {
+    margin-top: 12px;
+}
+
+.mt-4 {
+    margin-top: 16px;
+}
+
+.mt-6 {
+    margin-top: 24px;
+}
+
+.mt-8 {
+    margin-top: 32px;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.mt-2 {
+    margin-top: 8px;
+}
+
+.mt-3 {
+    margin-top: 12px;
+}
+
+.whitespace-pre-wrap {
+    white-space: pre-wrap;
+}

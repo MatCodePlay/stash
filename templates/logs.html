@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="apple-page-title">Activity Log</h1>
+    <h1 class="stash-page-title">Activity Log</h1>
 
-    <div class="apple-card" style="padding: 0; overflow: hidden;">
-        <table class="w-full">
-            <thead style="background: rgba(0,0,0,0.02);">
+    <div class="stash-card stash-table-wrapper">
+        <table class="stash-table">
+            <thead>
                 <tr>
-                    <th class="px-8 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-500">Description</th>
-                    <th class="px-8 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-500">Date & Time</th>
+                    <th>Description</th>
+                    <th>Date & Time</th>
                 </tr>
             </thead>
             <tbody>
                 {% for log in logs %}
-                <tr style="border-top: 1px solid rgba(0,0,0,0.05);">
-                    <td class="px-8 py-5 text-sm text-gray-700">{{ log.description }}</td>
-                    <td class="px-8 py-5 text-sm text-gray-500">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <tr>
+                    <td class="stash-table-text">{{ log.description }}</td>
+                    <td class="stash-table-text-sec">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="2" class="px-8 py-8 text-center apple-text-sm">No activity recorded yet</td>
+                    <td colspan="2" class="stash-table-empty">No activity recorded yet</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -27,13 +27,13 @@
     </div>
 
     {% if total_pages is defined and total_pages > 1 %}
-    <div class="flex justify-center items-center gap-4 mt-8">
+    <div class="stash-pagination">
         {% if page > 1 %}
-        <a href="/logs?page={{ page - 1 }}" class="apple-button-secondary">Previous</a>
+        <a href="/logs?page={{ page - 1 }}" class="stash-button-secondary">Previous</a>
         {% endif %}
-        <span class="apple-text-sm">Page {{ page }} / {{ total_pages }}</span>
+        <span class="stash-text-sm">Page {{ page }} / {{ total_pages }}</span>
         {% if page < total_pages %}
-        <a href="/logs?page={{ page + 1 }}" class="apple-button-secondary">Next</a>
+        <a href="/logs?page={{ page + 1 }}" class="stash-button-secondary">Next</a>
         {% endif %}
     </div>
     {% endif %}
