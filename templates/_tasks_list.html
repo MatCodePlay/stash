@@ -1,10 +1,10 @@
-<div id="tasks-list" class="space-y-3">
+<div id="tasks-list" class="apple-grid" style="gap: 16px;">
     {% for task in tasks %}
-    <div class="card p-4">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
+    <div class="apple-card" style="padding: 1.5rem;">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-4">
                 <form hx-put="/tasks/{{ task.id }}?page={{ page }}" hx-target="#tasks-list" hx-swap="innerHTML">
-                    <button type="submit" class="w-5 h-5 rounded-full border-2 {% if task.is_done %}bg-blue-500 border-blue-500{% else %}border-gray-300 hover:border-blue-400{% endif %} flex items-center justify-center">
+                    <button type="submit" class="apple-checkbox {% if task.is_done %}checked{% endif %}">
                         {% if task.is_done %}
                         <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
@@ -12,17 +12,17 @@
                         {% endif %}
                     </button>
                 </form>
-                <span class="{% if task.is_done %}text-gray-400 line-through{% else %}text-gray-800{% endif %}">{{ task.content }}</span>
+                <span class="{% if task.is_done %}text-gray-400 line-through text-lg{% else %}text-gray-800 text-lg{% endif %}">{{ task.content }}</span>
             </div>
             <form hx-delete="/tasks/{{ task.id }}?page={{ page }}" hx-target="#tasks-list" hx-swap="innerHTML">
-                <button type="submit" class="text-gray-400 hover:text-red-500">
+                <button type="submit" class="apple-delete">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </form>
         </div>
-        <div class="text-xs text-gray-400 mt-1 ml-8">
+        <div class="apple-text-sm mt-2 ml-10">
             {% if task.is_done and task.completed_at %}
                 done: {{ task.completed_at.strftime('%Y-%m-%d %H:%M') }}
             {% elif task.created_at %}
@@ -31,6 +31,6 @@
         </div>
     </div>
     {% else %}
-    <div class="card p-8 text-center text-gray-500">No tasks yet. Add one above!</div>
+    <div class="apple-empty apple-card">No tasks yet. Add one above!</div>
     {% endfor %}
 </div>

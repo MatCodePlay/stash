@@ -10,7 +10,16 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text
+from sqlalchemy import (
+    create_engine,
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    Text,
+    case,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
@@ -552,25 +561,39 @@ async def blueprint_detail(request: Request, blueprint_id: int):
 
     db = SessionLocal()
     blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
-    from sqlalchemy import case
 
-    priority = case(
-        (BlueprintNode.status == "New", 0),
-        (BlueprintNode.status == "In Progress", 1),
-        (BlueprintNode.status == "Completed", 2),
-        (BlueprintNode.status == "Rejected", 3),
-        else_=4,
-    )
-    nodes = (
+    active_nodes = (
         db.query(BlueprintNode)
         .filter(BlueprintNode.blueprint_id == blueprint_id)
-        .order_by(priority, BlueprintNode.created_at.desc())
+        .filter(BlueprintNode.status.in_(["New", "In Progress"]))
+        .order_by(
+            case(
+                (BlueprintNode.status == "New", 0),
+                (BlueprintNode.status == "In Progress", 1),
+                else_=2,
+            ),
+            BlueprintNode.created_at.desc(),
+        )
         .all()
     )
+
+    archive_nodes = (
+        db.query(BlueprintNode)
+        .filter(BlueprintNode.blueprint_id == blueprint_id)
+        .filter(BlueprintNode.status.in_(["Completed", "Rejected"]))
+        .order_by(BlueprintNode.created_at.desc())
+        .all()
+    )
+
     db.close()
     return templates.TemplateResponse(
         "blueprint_detail.html",
-        {"request": request, "blueprint": blueprint, "nodes": nodes},
+        {
+            "request": request,
+            "blueprint": blueprint,
+            "active_nodes": active_nodes,
+            "archive_nodes": archive_nodes,
+        },
     )
 
 
@@ -593,25 +616,39 @@ async def update_node_status(
         log_activity(ADMIN_ID, f"Updated node status to {status}")
 
     blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
-    from sqlalchemy import case
 
-    priority = case(
-        (BlueprintNode.status == "New", 0),
-        (BlueprintNode.status == "In Progress", 1),
-        (BlueprintNode.status == "Completed", 2),
-        (BlueprintNode.status == "Rejected", 3),
-        else_=4,
-    )
-    nodes = (
+    active_nodes = (
         db.query(BlueprintNode)
         .filter(BlueprintNode.blueprint_id == blueprint_id)
-        .order_by(priority, BlueprintNode.created_at.desc())
+        .filter(BlueprintNode.status.in_(["New", "In Progress"]))
+        .order_by(
+            case(
+                (BlueprintNode.status == "New", 0),
+                (BlueprintNode.status == "In Progress", 1),
+                else_=2,
+            ),
+            BlueprintNode.created_at.desc(),
+        )
         .all()
     )
+
+    archive_nodes = (
+        db.query(BlueprintNode)
+        .filter(BlueprintNode.blueprint_id == blueprint_id)
+        .filter(BlueprintNode.status.in_(["Completed", "Rejected"]))
+        .order_by(BlueprintNode.created_at.desc())
+        .all()
+    )
+
     db.close()
     return templates.TemplateResponse(
-        "_node_card.html",
-        {"request": request, "blueprint": blueprint, "nodes": [node]},
+        "_nodes_list.html",
+        {
+            "request": request,
+            "blueprint": blueprint,
+            "active_nodes": active_nodes,
+            "archive_nodes": archive_nodes,
+        },
     )
 
 
@@ -639,8 +676,72 @@ async def add_blueprint_node(
     db.add(node)
     db.commit()
     log_activity(ADMIN_ID, f"Added node to blueprint {blueprint_id}")
+
+    blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
+
+    active_nodes = (
+        db.query(BlueprintNode)
+        .filter(BlueprintNode.blueprint_id == blueprint_id)
+        .filter(BlueprintNode.status.in_(["New", "In Progress"]))
+        .order_by(
+            case(
+                (BlueprintNode.status == "New", 0),
+                (BlueprintNode.status == "In Progress", 1),
+                else_=2,
+            ),
+            BlueprintNode.created_at.desc(),
+        )
+        .all()
+    )
+
+    archive_nodes = (
+        db.query(BlueprintNode)
+        .filter(BlueprintNode.blueprint_id == blueprint_id)
+        .filter(BlueprintNode.status.in_(["Completed", "Rejected"]))
+        .order_by(BlueprintNode.created_at.desc())
+        .all()
+    )
+
     db.close()
-    return Response(headers={"HX-Redirect": f"/blueprints/{blueprint_id}"})
+    return templates.TemplateResponse(
+        "_nodes_list.html",
+        {
+            "request": request,
+            "blueprint": blueprint,
+            "active_nodes": active_nodes,
+            "archive_nodes": archive_nodes,
+        },
+    )
+
+
+@app.post(
+    "/blueprints/{blueprint_id}/nodes/{node_id}/update_notes",
+    response_class=HTMLResponse,
+)
+async def update_node_notes(
+    request: Request,
+    blueprint_id: int,
+    node_id: int,
+    notes: str = Form(""),
+):
+    user_id = get_current_user(request)
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+
+    db = SessionLocal()
+    node = db.query(BlueprintNode).filter(BlueprintNode.id == node_id).first()
+    if node:
+        node.notes = notes if notes else None
+        db.commit()
+        log_activity(ADMIN_ID, f"Updated notes for node {node_id}")
+
+    blueprint = db.query(Blueprint).filter(Blueprint.id == blueprint_id).first()
+
+    db.close()
+    return templates.TemplateResponse(
+        "_node_single.html",
+        {"request": request, "blueprint": blueprint, "node": node},
+    )
 
 
 if __name__ == "__main__":

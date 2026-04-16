@@ -1,0 +1,275 @@
+:root {
+    --apple-bg: #F5F5F7;
+    --apple-card: #FFFFFF;
+    --apple-border: rgba(0, 0, 0, 0.08);
+    --apple-text-main: #1D1D1F;
+    --apple-text-sec: #6E6E73;
+    --apple-blue: #007AFF;
+    --apple-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+}
+
+body {
+    background-color: var(--apple-bg);
+    color: var(--apple-text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Global Card Style */
+.apple-card {
+    background: var(--apple-card);
+    border: 1px solid var(--apple-border);
+    border-radius: 24px;
+    box-shadow: var(--apple-shadow);
+    padding: 2rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.apple-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Form Inputs & Textareas */
+.apple-input {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--apple-border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    width: 100%;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: var(--apple-text-main);
+    outline: none;
+}
+
+.apple-input::placeholder {
+    color: var(--apple-text-sec);
+}
+
+.apple-input:focus {
+    background: white;
+    border-color: var(--apple-blue) !important;
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    outline: none;
+}
+
+/* Form Labels */
+.apple-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--apple-text-main);
+    margin-bottom: 8px;
+}
+
+/* Primary Button */
+.apple-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--apple-blue);
+    color: white;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.apple-button:hover {
+    background: #0063CC;
+    transform: translateY(-1px);
+}
+
+.apple-button:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.apple-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Secondary Button */
+.apple-button-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--apple-text-sec);
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: 1px solid var(--apple-border);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.apple-button-secondary:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--apple-text-main);
+}
+
+/* Status Badge */
+.apple-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.apple-badge-new {
+    background: #f3f3f3;
+    color: #6e6e73;
+}
+
+.apple-badge-progress {
+    background: rgba(0, 122, 255, 0.1);
+    color: #007AFF;
+}
+
+.apple-badge-completed {
+    background: rgba(52, 199, 89, 0.1);
+    color: #34C759;
+}
+
+.apple-badge-rejected {
+    background: rgba(255, 59, 48, 0.1);
+    color: #FF3B30;
+}
+
+/* Page Title */
+.apple-page-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--apple-text-main);
+    margin-bottom: 24px;
+}
+
+/* Card Title */
+.apple-card-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--apple-text-main);
+}
+
+/* Small Text */
+.apple-text-sm {
+    font-size: 14px;
+    color: var(--apple-text-sec);
+}
+
+/* Links */
+.apple-link {
+    color: var(--apple-blue);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.apple-link:hover {
+    text-decoration: underline;
+}
+
+/* Form Group */
+.apple-form-group {
+    margin-bottom: 16px;
+}
+
+/* Form Row */
+.apple-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+/* Checkbox Custom */
+.apple-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--apple-border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.apple-checkbox.checked {
+    background: var(--apple-blue);
+    border-color: var(--apple-blue);
+}
+
+/* Delete Button */
+.apple-delete {
+    color: var(--apple-text-sec);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.apple-delete:hover {
+    color: #FF3B30;
+}
+
+/* Section Divider */
+.apple-divider {
+    border-top: 1px solid var(--apple-border);
+    margin: 24px 0;
+}
+
+/* Empty State */
+.apple-empty {
+    text-align: center;
+    color: var(--apple-text-sec);
+    padding: 48px 24px;
+}
+
+/* Flex utilities */
+.apple-flex {
+    display: flex;
+}
+
+.apple-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.apple-flex-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Grid utilities */
+.apple-grid {
+    display: grid;
+    gap: 24px;
+}
+
+.apple-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.apple-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+    .apple-grid-2,
+    .apple-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,119 @@
+<div class="apple-grid" style="gap: 24px;">
+    {% if active_nodes %}
+    {% for node in active_nodes %}
+    <div id="node-{{ node.id }}" class="apple-card">
+        <div class="flex justify-between items-start mb-4">
+            <div class="flex-1">
+                <div class="flex items-center gap-4 mb-4">
+                    <h3 class="apple-card-title">{{ node.title }}</h3>
+                    <div class="relative group">
+                        <button type="button" class="apple-badge
+                            {% if node.status == 'Completed' %}apple-badge-completed
+                            {% elif node.status == 'In Progress' %}apple-badge-progress
+                            {% elif node.status == 'Rejected' %}apple-badge-rejected
+                            {% else %}apple-badge-new{% endif %}">
+                            {{ node.status }}
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline; margin-left: 4px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div class="absolute left-0 top-full mt-1 z-10">
+                            <div class="hidden group-hover:flex flex-col bg-white rounded-lg shadow-lg border p-1 min-w-[120px]">
+                                <form hx-post="/blueprints/{{ blueprint.id }}/status/{{ node.id }}" hx-target="#nodes-container" hx-swap="innerHTML">
+                                    <input type="hidden" name="status" value="New">
+                                    <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 rounded">New</button>
+                                </form>
+                                <form hx-post="/blueprints/{{ blueprint.id }}/status/{{ node.id }}" hx-target="#nodes-container" hx-swap="innerHTML">
+                                    <input type="hidden" name="status" value="In Progress">
+                                    <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 rounded">In Progress</button>
+                                </form>
+                                <form hx-post="/blueprints/{{ blueprint.id }}/status/{{ node.id }}" hx-target="#nodes-container" hx-swap="innerHTML">
+                                    <input type="hidden" name="status" value="Completed">
+                                    <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 rounded">Completed</button>
+                                </form>
+                                <form hx-post="/blueprints/{{ blueprint.id }}/status/{{ node.id }}" hx-target="#nodes-container" hx-swap="innerHTML">
+                                    <input type="hidden" name="status" value="Rejected">
+                                    <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 rounded">Rejected</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if node.url %}
+                <a href="{{ node.url }}" target="_blank" class="apple-link flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    Open Link
+                </a>
+                {% endif %}
+                <div class="mt-6">
+                    <textarea 
+                        id="notes-{{ node.id }}"
+                        name="notes"
+                        rows="3"
+                        placeholder="Click to add thoughts..."
+                        class="apple-input"
+                        hx-post="/blueprints/{{ blueprint.id }}/nodes/{{ node.id }}/update_notes"
+                        hx-trigger="blur"
+                        hx-target="#node-{{ node.id }}"
+                        hx-swap="outerHTML"
+                    >{{ node.notes or '' }}</textarea>
+                </div>
+                <p class="apple-text-sm mt-4">{{ node.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="apple-empty apple-card">
+        No active nodes. Add one above or move from archive!
+    </div>
+    {% endif %}
+</div>
+
+{% if archive_nodes %}
+<div class="mt-8">
+    <button type="button" onclick="document.getElementById('archive-section').classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180')" 
+        class="flex items-center justify-between w-full text-sm font-medium text-gray-600 hover:text-gray-800 mb-4">
+        <span>Completed & Rejected ({{ archive_nodes|length }})</span>
+        <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+    </button>
+    <div id="archive-section" class="hidden">
+        <div class="apple-grid" style="gap: 16px;">
+            {% for node in archive_nodes %}
+            <div id="node-{{ node.id }}" class="apple-card" style="padding: 1.5rem;
+                {% if node.status == 'Completed' %}border-left: 4px solid #34C759;
+                {% else %}border-left: 4px solid #FF3B30;{% endif %}">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3 class="text-base font-semibold text-gray-900">{{ node.title }}</h3>
+                            <span class="apple-badge
+                                {% if node.status == 'Completed' %}apple-badge-completed
+                                {% else %}apple-badge-rejected{% endif %}">
+                                {{ node.status }}
+                            </span>
+                        </div>
+                        {% if node.url %}
+                        <a href="{{ node.url }}" target="_blank" class="apple-link flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                            Open Link
+                        </a>
+                        {% endif %}
+                        {% if node.notes %}
+                        <p class="text-sm text-gray-600 mt-3">{{ node.notes }}</p>
+                        {% endif %}
+                        <p class="apple-text-sm mt-3">{{ node.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
